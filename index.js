@@ -1,5 +1,8 @@
 var fs = require('fs');
-var Q = require('q');
+
+var archiver = require('archiver');         //压缩文件
+var archive = archiver('zip');
+
 var request = require('request');
 var cheerio = require('cheerio');
 var log = require('./lib/log');             //日志系统
@@ -23,7 +26,7 @@ var info = console.log,
     };
 
 // 模版的存放路径
-var bashTemplatePath = __dirname + '\\template\\';
+var baseTemplatePath = __dirname + '\\template\\';
 var baseUrl = config.url.substring(0, config.url.indexOf('/', 7));
 var currentTime = new Date().getTime();     //当前时间戳
 
@@ -78,8 +81,8 @@ function parseContent(err, data) {
                     _('.lf-bg .phone link').attr('href', css);
                 }
                 var html = _('.lf-bg').html();
-                fs.mkdir(bashTemplatePath, function(){
-                    fs.writeFile(bashTemplatePath + sid + '.html', html, function(){
+                fs.mkdir(baseTemplatePath, function(){
+                    fs.writeFile(baseTemplatePath + sid + '.html', html, function(){
                         // 完成则触发generateTemplate事件
                         countFile += 1;
                         ep.emit('generateTemplate');
@@ -119,6 +122,15 @@ function parseContent(err, data) {
     // 如果done事件触发了2次，则提示出来
     ep.after('done', 2, function() {
         success('成功抓取，花费时间：' + (new Date().getTime() - currentTime) + 'ms');
-        process.exit();
+        var output = fs.createWriteStream('template.zip');
+        archive.pipe(output);
+        archive.bulk([{
+            src: ['template/**']
+        }]);
+        archive.finalize();
+        output.on('close', function() {
+            success('成功压缩文件，总共：' + archive.pointer() + '字节！');
+            process.exit();
+        });
     });
 }
