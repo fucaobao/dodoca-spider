@@ -11,7 +11,7 @@ var config = {
         'Cache-Control': 'max-age=0',
         'Host': 'oauth.dodoca.com',
         //cookie,可能会变化
-        'Cookie': 'aliyungf_tc=AQAAAI7KrD+fog4AoyE6ezFJRkVNIjEF; PHPSESSID=m0apj2lsmfovcsuelvtckjmdt4; novice=value; rem_u=jslxswbg; rem_p=jslxswbg'
+        'Cookie': 'td_cookie=243289284; rem_u=jslxswbg; rem_p=jslxswbg; aliyungf_tc=AQAAALFZxi8i/goAoyE6e4BzDv35mwKT; PHPSESSID=egrpc26248f8vigokhq4t38rm7; novice=value'
     }
 };
 module.exports = config;

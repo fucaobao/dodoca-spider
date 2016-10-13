@@ -3,7 +3,6 @@ var fs = require('fs');
 var archiver = require('archiver');         //压缩文件
 var archive = archiver('zip');
 
-var request = require('request');
 var cheerio = require('cheerio');
 var log = require('./lib/log');             //日志系统
 var util = require('./lib/util');
