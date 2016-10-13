@@ -1,0 +1,1 @@
+# 抓取[点点客](http://www.dodoca.com/)模版，存入mongodb，写入文件夹
