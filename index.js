@@ -1,13 +1,13 @@
 var fs = require('fs');
 
-var archiver = require('archiver');         //压缩文件
-var archive = archiver('zip');
-
 var cheerio = require('cheerio');
 var log = require('./lib/log');             //日志系统
 var util = require('./lib/util');
 var config = require('./config/config');
 var dao = require('./models/dao');
+
+var archiver = require('archiver');         //压缩文件
+var archive = archiver('zip');
 
 var eventproxy = require('eventproxy');     //并发控制
 var ep = new eventproxy();
@@ -24,8 +24,8 @@ var info = console.log,
         info(s.green);
     };
 
-// 模版的存放路径
-var baseTemplatePath = __dirname + '\\template\\';
+// 模版所在的文件夹
+var templateName = 'template';
 var baseUrl = config.url.substring(0, config.url.indexOf('/', 7));
 var currentTime = new Date().getTime();     //当前时间戳
 
@@ -79,7 +79,17 @@ function parseContent(err, data) {
                     css = baseUrl + css;
                     _('.lf-bg .phone link').attr('href', css);
                 }
+                var imgs = _('.lf-bg .phone img');
+                [].forEach.call(imgs, function(item, index){
+                    item = _(item);
+                    var src = item.attr('src');
+                    if(src.indexOf('http') !== 0){
+                        src = baseUrl + src;
+                        item.attr('src', src);
+                    }
+                });
                 var html = _('.lf-bg').html();
+                var baseTemplatePath = __dirname + '\\' + templateName +'\\';
                 fs.mkdir(baseTemplatePath, function(){
                     fs.writeFile(baseTemplatePath + sid + '.html', html, function(){
                         // 完成则触发generateTemplate事件
@@ -121,15 +131,19 @@ function parseContent(err, data) {
     // 如果done事件触发了2次，则提示出来
     ep.after('done', 2, function() {
         success('成功抓取，花费时间：' + (new Date().getTime() - currentTime) + 'ms');
-        var output = fs.createWriteStream('template.zip');
+        zip();
+    });
+
+    function zip(){
+        var output = fs.createWriteStream(templateName + '.zip');
         archive.pipe(output);
         archive.bulk([{
-            src: ['template/**']
+            src: [templateName + '/**']
         }]);
         archive.finalize();
         output.on('close', function() {
             success('成功压缩文件，总共：' + archive.pointer() + '字节！');
             process.exit();
         });
-    });
+    }
 }
