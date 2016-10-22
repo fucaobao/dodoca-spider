@@ -91,7 +91,7 @@ function parseContent(err, data) {
                 var html = _('.lf-bg').html();
                 var baseTemplatePath = __dirname + '\\' + templateName +'\\';
                 fs.mkdir(baseTemplatePath, function(){
-                    fs.writeFile(baseTemplatePath + sid + '.html', html, function(){
+                    fs.writeFile(baseTemplatePath + sid + '-' + title + '.html', html, function(){
                         // 完成则触发generateTemplate事件
                         countFile += 1;
                         ep.emit('generateTemplate');
