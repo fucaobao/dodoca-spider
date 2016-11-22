@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 
 var cheerio = require('cheerio');
 var log = require('./lib/log');             //日志系统
@@ -80,18 +81,18 @@ function parseContent(err, data) {
                     _('.lf-bg .phone link').attr('href', css);
                 }
                 var imgs = _('.lf-bg .phone img');
-                [].forEach.call(imgs, function(item, index){
+                [].forEach.call(imgs, function(item, index) {
                     item = _(item);
                     var src = item.attr('src');
-                    if(src.indexOf('http') !== 0){
+                    if (src.indexOf('http') !== 0) {
                         src = baseUrl + src;
                         item.attr('src', src);
                     }
                 });
                 var html = _('.lf-bg').html();
-                var baseTemplatePath = __dirname + '\\' + templateName +'\\';
-                fs.mkdir(baseTemplatePath, function(){
-                    fs.writeFile(baseTemplatePath + sid + '-' + title + '.html', html, function(){
+                var baseTemplatePath = __dirname + path.sep + templateName + path.sep;
+                fs.mkdir(baseTemplatePath, function() {
+                    fs.writeFile(baseTemplatePath + sid + '-' + title + '.html', html, function() {
                         // 完成则触发generateTemplate事件
                         countFile += 1;
                         ep.emit('generateTemplate');
@@ -134,7 +135,7 @@ function parseContent(err, data) {
         zip();
     });
 
-    function zip(){
+    function zip() {
         var output = fs.createWriteStream(templateName + '.zip');
         archive.pipe(output);
         archive.bulk([{

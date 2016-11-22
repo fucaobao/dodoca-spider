@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require("path");
 
 var cheerio = require('cheerio');
 var log = require('./lib/log');             //日志系统
@@ -78,7 +79,7 @@ function parseContent(err, data) {
                 var _ = cheerio.load(html);
                 var imgs = _('img');
                 var imgList = [];
-                [].forEach.call(imgs, function(item, index){
+                [].forEach.call(imgs, function(item, index) {
                     item = _(item);
                     var src = item.attr('src');
                     if (imgList.indexOf(src) === -1) {
@@ -90,7 +91,7 @@ function parseContent(err, data) {
                         }
                     }
                 });
-                var baseTemplatePath = __dirname + '\\' + templateName + '\\';
+                var baseTemplatePath = __dirname + path.sep + templateName + path.sep;
                 fs.mkdir(baseTemplatePath, function() {
                     fs.writeFile(baseTemplatePath + obj.id + '-' + title + '.html', html, function() {
                         // 完成则触发generateTemplate事件
@@ -105,10 +106,10 @@ function parseContent(err, data) {
     // 如果generateTemplate事件触发了max次，则提示出来
     ep.after('generateTemplate', max, function() {
         success('成功写入文件的模版数量：' + countFile + '，花费时间：' + (new Date().getTime() - currentTime) + 'ms');
-         zip();
+        zip();
     });
 
-    function zip(){
+    function zip() {
         var output = fs.createWriteStream(templateName + '.zip');
         archive.pipe(output);
         archive.bulk([{
