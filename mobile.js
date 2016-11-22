@@ -56,6 +56,7 @@ function parseContent(err, data) {
         item = $(item);
         var img = item.find('.img_w img').attr('src');
         var sid = img.substring(img.lastIndexOf('/') + 1, img.lastIndexOf('.'));
+        var title = item.find('span').text();
         util.request({
             url: baseUrl + '/microsite/insertwebsite',
             method: 'post',
@@ -91,7 +92,7 @@ function parseContent(err, data) {
                 });
                 var baseTemplatePath = __dirname + '\\' + templateName + '\\';
                 fs.mkdir(baseTemplatePath, function() {
-                    fs.writeFile(baseTemplatePath + obj.id + '.html', html, function() {
+                    fs.writeFile(baseTemplatePath + obj.id + '-' + title + '.html', html, function() {
                         // 完成则触发generateTemplate事件
                         countFile += 1;
                         ep.emit('generateTemplate');
