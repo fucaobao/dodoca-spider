@@ -4,7 +4,8 @@ var cheerio = require('cheerio');
 var log = require('./lib/log');             //日志系统
 var util = require('./lib/util');
 var config = require('./config/config');
-var dao = require('./models/dao');
+
+var superagent = require('superagent');
 
 var archiver = require('archiver');         //压缩文件
 var archive = archiver('zip');
@@ -25,7 +26,7 @@ var info = console.log,
     };
 
 // 模版所在的文件夹
-var templateName = 'pc_template';
+var templateName = 'h5_template';
 var baseUrl = config.url.substring(0, config.url.indexOf('/', 7));
 var currentTime = new Date().getTime();     //当前时间戳
 
@@ -48,7 +49,6 @@ function parseContent(err, data) {
         error('登录失败！');
         return process.exit();
     }
-    var countDB = 0;    //执行次数
     var countFile = 0;  //执行次数
     var templateList = $('.micro_site_ul li');
     var max = templateList.length;
@@ -56,7 +56,6 @@ function parseContent(err, data) {
         item = $(item);
         var img = item.find('.img_w img').attr('src');
         var sid = img.substring(img.lastIndexOf('/') + 1, img.lastIndexOf('.'));
-        var title = item.find('span').text();
         util.request({
             url: baseUrl + '/microsite/insertwebsite',
             method: 'post',
@@ -68,70 +67,44 @@ function parseContent(err, data) {
             }
         }, function(error, data) {
             var obj = JSON.parse(data);
-            var url = baseUrl + '/microsite/updatewebsite?id=' + obj.id + '&weicontenttile=' + obj.weicontenttile + '&type=1';
-            util.request({
-                url: url,
-                method: 'post'
-            }, function(error, data) {
-                var _ = cheerio.load(data);
-                var css = _('.lf-bg .phone link').attr('href');
-                if (css.indexOf('http') !== 0) {
-                    css = baseUrl + css;
-                    _('.lf-bg .phone link').attr('href', css);
+            var url = config.mobileBaseLink + obj.id;
+            // ATTENTION：这里用util.request没有返回，所以改用superagent
+            superagent.get(url).end(function(err, res) {
+                if (err || !res || !res.text) {
+                    return process.exit();
                 }
-                var imgs = _('.lf-bg .phone img');
+                var html = res.text;
+                var _ = cheerio.load(html);
+                var imgs = _('img');
+                var imgList = [];
                 [].forEach.call(imgs, function(item, index){
                     item = _(item);
                     var src = item.attr('src');
-                    if(src.indexOf('http') !== 0){
-                        src = baseUrl + src;
-                        item.attr('src', src);
+                    if (imgList.indexOf(src) === -1) {
+                        imgList.push(src);
+                        if (src.indexOf('http') !== 0) {
+                            var targetSrc = baseUrl + src;
+                            var regExp = new RegExp(src, 'gmi');
+                            html = html.replace(regExp, targetSrc);
+                        }
                     }
                 });
-                var html = _('.lf-bg').html();
-                var baseTemplatePath = __dirname + '\\' + templateName +'\\';
-                fs.mkdir(baseTemplatePath, function(){
-                    fs.writeFile(baseTemplatePath + sid + '-' + title + '.html', html, function(){
+                var baseTemplatePath = __dirname + '\\' + templateName + '\\';
+                fs.mkdir(baseTemplatePath, function() {
+                    fs.writeFile(baseTemplatePath + obj.id + '.html', html, function() {
                         // 完成则触发generateTemplate事件
                         countFile += 1;
                         ep.emit('generateTemplate');
                     });
                 });
-                dao.findOneAndUpdate({
-                    sid: sid,
-                    image: img,
-                    title: title,
-                    sub: {
-                        url: url,
-                        html: html,
-                        css: css
-                    },
-                    date: new Date()
-                }).then(function(result) {
-                    // 完成则触发upsert事件
-                    countDB += 1;
-                    ep.emit('upsert');
-                });
             });
         });
-    });
-
-    // 如果upsert事件触发了max次，则提示出来
-    ep.after('upsert', max, function() {
-        success('成功写入数据库的模版数量：' + countDB + '，花费时间：' + (new Date().getTime() - currentTime) + 'ms');
-        ep.emit('done');
     });
 
     // 如果generateTemplate事件触发了max次，则提示出来
     ep.after('generateTemplate', max, function() {
         success('成功写入文件的模版数量：' + countFile + '，花费时间：' + (new Date().getTime() - currentTime) + 'ms');
-        ep.emit('done');
-    });
-
-    // 如果done事件触发了2次，则提示出来
-    ep.after('done', 2, function() {
-        success('成功抓取，花费时间：' + (new Date().getTime() - currentTime) + 'ms');
-        zip();
+         zip();
     });
 
     function zip(){

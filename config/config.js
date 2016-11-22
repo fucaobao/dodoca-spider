@@ -1,5 +1,6 @@
 var config = {
-    'url': 'http://oauth.dodoca.com/microsite/templatelist?type=1',//jslxswbg
+    'url': 'http://oauth.dodoca.com/microsite/templatelist?type=1', //jslxswbg
+    'mobileBaseLink': 'http://mobile.dodoca.com/251747/phonewebsite/website?uid=251747&id=', //对同一个用户uid是相同的
     // 发送的请求头部
     'headers': {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -11,7 +12,7 @@ var config = {
         'Cache-Control': 'max-age=0',
         'Host': 'oauth.dodoca.com',
         //cookie,可能会变化
-        'Cookie': 'td_cookie=292323337; aliyungf_tc=AQAAAI7KrD+fog4AoyE6ezFJRkVNIjEF; PHPSESSID=m0apj2lsmfovcsuelvtckjmdt4; novice=value; rem_u=jslxswbg; rem_p=jslxswbg'
+        'Cookie': 'aliyungf_tc=AQAAAOtnKHroXwQAbj48OoGCw6EYSxrS; PHPSESSID=1dsjgg8svnm4afc9qqnqh85rn1; novice=value; rem_u=jslxswbg; rem_p=jslxswbg'
     }
 };
 module.exports = config;

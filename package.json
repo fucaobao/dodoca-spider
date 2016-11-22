@@ -4,7 +4,8 @@
   "description": "抓取点点客的模版",
   "main": "index.js",
   "scripts": {
-    "start": "node index",
+    "pc": "node index",
+    "h5": "node mobile",
     "clean": "node clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,7 +20,8 @@
     "log4js": "^0.6.38",
     "mongoose": "^4.6.3",
     "q": "^1.4.1",
-    "request": "^2.69.0"
+    "request": "^2.69.0",
+    "superagent": "^3.0.0"
   },
   "devDependencies": {
     "devtool": "^2.2.0"
