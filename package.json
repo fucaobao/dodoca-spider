@@ -6,6 +6,7 @@
   "scripts": {
     "pc": "node index",
     "h5": "node mobile",
+    "sub": "node sub",
     "clean": "node clean",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
